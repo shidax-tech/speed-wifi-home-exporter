@@ -21,27 +21,34 @@ type SpeedWiFiHomeCollector struct {
 }
 
 func NewSpeedWiFiHomeCollector(namespace string, address string) SpeedWiFiHomeCollector {
+	labels := prometheus.Labels{"address": address}
+
 	return SpeedWiFiHomeCollector{
 		NewMonthClient(address),
 		prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "error_count",
+			ConstLabels: labels,
 		}),
 		prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "total_upload_bytes",
+			ConstLabels: labels,
 		}),
 		prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "total_download_bytes",
+			ConstLabels: labels,
 		}),
 		prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "monthly_upload_bytes",
+			ConstLabels: labels,
 		}),
 		prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "monthly_download_bytes",
+			ConstLabels: labels,
 		}),
 	}
 }
