@@ -13,6 +13,7 @@ import (
 type SpeedWiFiHomeCollector struct {
 	monthClient MonthClient
 
+	ErrorCount         prometheus.Counter
 	TotalUploadBytes   prometheus.Counter
 	TotalDownloadBytes prometheus.Counter
 }
@@ -20,6 +21,10 @@ type SpeedWiFiHomeCollector struct {
 func NewSpeedWiFiHomeCollector(namespace string) SpeedWiFiHomeCollector {
 	return SpeedWiFiHomeCollector{
 		NewMonthClient(),
+		prometheus.NewCounter(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "error_count",
+		}),
 		prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "total_upload_bytes",
@@ -32,6 +37,7 @@ func NewSpeedWiFiHomeCollector(namespace string) SpeedWiFiHomeCollector {
 }
 
 func (c SpeedWiFiHomeCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- c.ErrorCount.Desc()
 	ch <- c.TotalUploadBytes.Desc()
 	ch <- c.TotalDownloadBytes.Desc()
 }
@@ -40,8 +46,10 @@ func (c SpeedWiFiHomeCollector) Collect(ch chan<- prometheus.Metric) {
 	uploaded, downloaded, err := c.monthClient.Collect()
 	if err != nil {
 		log.Printf("Failed to fetch: %s\n", err.Error())
-		return
+		c.ErrorCount.Inc()
 	}
+
+	c.ErrorCount.Collect(ch)
 
 	ch <- prometheus.MustNewConstMetric(c.TotalUploadBytes.Desc(), prometheus.CounterValue, float64(uploaded))
 	ch <- prometheus.MustNewConstMetric(c.TotalDownloadBytes.Desc(), prometheus.CounterValue, float64(downloaded))
