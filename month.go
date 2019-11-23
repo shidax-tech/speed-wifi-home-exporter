@@ -57,10 +57,17 @@ func (mc MonthClient) Fetch() (*MonthStatistics, error) {
 	return &month, nil
 }
 
-func (mc MonthClient) Collect() (uploaded, downloaded int, err error) {
+type Statistics struct {
+	TotalUploaded     int
+	TotalDownloaded   int
+	MonthlyUploaded   int
+	MonthlyDownloaded int
+}
+
+func (mc MonthClient) Collect() (Statistics, error) {
 	m, err := mc.Fetch()
 	if err != nil {
-		return 0, 0, err
+		return Statistics{}, err
 	}
 
 	if mc.lastStat.MonthLastClearTime != m.MonthLastClearTime {
@@ -72,5 +79,10 @@ func (mc MonthClient) Collect() (uploaded, downloaded int, err error) {
 	}
 	mc.lastStat = *m
 
-	return mc.totalUploaded, mc.totalDownloaded, nil
+	return Statistics{
+		mc.totalUploaded,
+		mc.totalDownloaded,
+		m.CurrentMonthUpload,
+		m.CurrentMonthDownload,
+	}, nil
 }

@@ -13,9 +13,11 @@ import (
 type SpeedWiFiHomeCollector struct {
 	monthClient MonthClient
 
-	ErrorCount         prometheus.Counter
-	TotalUploadBytes   prometheus.Counter
-	TotalDownloadBytes prometheus.Counter
+	ErrorCount           prometheus.Counter
+	TotalUploadBytes     prometheus.Counter
+	TotalDownloadBytes   prometheus.Counter
+	MonthlyUploadBytes   prometheus.Gauge
+	MonthlyDownloadBytes prometheus.Gauge
 }
 
 func NewSpeedWiFiHomeCollector(namespace string, address string) SpeedWiFiHomeCollector {
@@ -33,6 +35,14 @@ func NewSpeedWiFiHomeCollector(namespace string, address string) SpeedWiFiHomeCo
 			Namespace: namespace,
 			Name:      "total_download_bytes",
 		}),
+		prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "monthly_upload_bytes",
+		}),
+		prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "monthly_download_bytes",
+		}),
 	}
 }
 
@@ -40,10 +50,12 @@ func (c SpeedWiFiHomeCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.ErrorCount.Desc()
 	ch <- c.TotalUploadBytes.Desc()
 	ch <- c.TotalDownloadBytes.Desc()
+	ch <- c.MonthlyUploadBytes.Desc()
+	ch <- c.MonthlyDownloadBytes.Desc()
 }
 
 func (c SpeedWiFiHomeCollector) Collect(ch chan<- prometheus.Metric) {
-	uploaded, downloaded, err := c.monthClient.Collect()
+	stat, err := c.monthClient.Collect()
 	if err != nil {
 		log.Printf("Failed to fetch: %s\n", err.Error())
 		c.ErrorCount.Inc()
@@ -51,8 +63,13 @@ func (c SpeedWiFiHomeCollector) Collect(ch chan<- prometheus.Metric) {
 
 	c.ErrorCount.Collect(ch)
 
-	ch <- prometheus.MustNewConstMetric(c.TotalUploadBytes.Desc(), prometheus.CounterValue, float64(uploaded))
-	ch <- prometheus.MustNewConstMetric(c.TotalDownloadBytes.Desc(), prometheus.CounterValue, float64(downloaded))
+	ch <- prometheus.MustNewConstMetric(c.TotalUploadBytes.Desc(), prometheus.CounterValue, float64(stat.TotalUploaded))
+	ch <- prometheus.MustNewConstMetric(c.TotalDownloadBytes.Desc(), prometheus.CounterValue, float64(stat.TotalDownloaded))
+
+	c.MonthlyUploadBytes.Set(float64(stat.MonthlyUploaded))
+	c.MonthlyUploadBytes.Collect(ch)
+	c.MonthlyDownloadBytes.Set(float64(stat.MonthlyDownloaded))
+	c.MonthlyDownloadBytes.Collect(ch)
 }
 
 func main() {
