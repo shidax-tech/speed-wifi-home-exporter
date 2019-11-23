@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 	"time"
 )
 
@@ -44,8 +45,8 @@ type MonthClient struct {
 	APIEndpoint string
 }
 
-func NewMonthClient() MonthClient {
-	return MonthClient{APIEndpoint: "http://192.168.100.1/api/monitoring/month_statistics"}
+func NewMonthClient(address string) MonthClient {
+	return MonthClient{APIEndpoint: fmt.Sprintf("http://%s/api/monitoring/month_statistics", address)}
 }
 
 func (mc MonthClient) Fetch() (*MonthStatistics, error) {

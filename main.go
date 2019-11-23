@@ -18,9 +18,9 @@ type SpeedWiFiHomeCollector struct {
 	TotalDownloadBytes prometheus.Counter
 }
 
-func NewSpeedWiFiHomeCollector(namespace string) SpeedWiFiHomeCollector {
+func NewSpeedWiFiHomeCollector(namespace string, address string) SpeedWiFiHomeCollector {
 	return SpeedWiFiHomeCollector{
-		NewMonthClient(),
+		NewMonthClient(address),
 		prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "error_count",
@@ -57,9 +57,10 @@ func (c SpeedWiFiHomeCollector) Collect(ch chan<- prometheus.Metric) {
 
 func main() {
 	listen := flag.String("listen", "127.0.0.1:9999", "The address to listen")
+	address := flag.String("address", "192.168.100.1", "The address of router")
 	flag.Parse()
 
-	c := NewSpeedWiFiHomeCollector("speed_wifi_home")
+	c := NewSpeedWiFiHomeCollector("speed_wifi_home", *address)
 	prometheus.MustRegister(c)
 
 	http.Handle("/metrics", promhttp.Handler())
