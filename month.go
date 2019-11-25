@@ -24,13 +24,13 @@ func (d *Date) String() string {
 }
 
 type MonthStatistics struct {
-	CurrentMonthDownload int
-	CurrentMonthUpload   int
-	MonthDuration        int
+	CurrentMonthDownload int64
+	CurrentMonthUpload   int64
+	MonthDuration        int64
 	MonthLastClearTime   *Date
-	CurrentDayUsed       int
-	CurrentDayDuration   int
-	CurrentMonthHSA      int `xml:"current_month_hsa"`
+	CurrentDayUsed       int64
+	CurrentDayDuration   int64
+	CurrentMonthHSA      int64 `xml:"current_month_hsa"`
 }
 
 type MonthResponse struct {
@@ -39,8 +39,8 @@ type MonthResponse struct {
 
 type MonthClient struct {
 	lastStat        MonthStatistics
-	totalUploaded   int
-	totalDownloaded int
+	totalUploaded   int64
+	totalDownloaded int64
 
 	APIEndpoint string
 }
@@ -58,10 +58,10 @@ func (mc MonthClient) Fetch() (*MonthStatistics, error) {
 }
 
 type Statistics struct {
-	TotalUploaded     int
-	TotalDownloaded   int
-	MonthlyUploaded   int
-	MonthlyDownloaded int
+	TotalUploaded     int64
+	TotalDownloaded   int64
+	MonthlyUploaded   int64
+	MonthlyDownloaded int64
 }
 
 func (mc MonthClient) Collect() (Statistics, error) {
