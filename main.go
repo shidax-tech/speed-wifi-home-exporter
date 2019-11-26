@@ -70,6 +70,10 @@ func (c SpeedWiFiHomeCollector) Collect(ch chan<- prometheus.Metric) {
 
 	c.ErrorCount.Collect(ch)
 
+	if err != nil {
+		return
+	}
+
 	ch <- prometheus.MustNewConstMetric(c.TotalUploadBytes.Desc(), prometheus.CounterValue, float64(stat.TotalUploaded))
 	ch <- prometheus.MustNewConstMetric(c.TotalDownloadBytes.Desc(), prometheus.CounterValue, float64(stat.TotalDownloaded))
 
