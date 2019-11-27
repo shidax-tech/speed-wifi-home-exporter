@@ -1,4 +1,4 @@
-FROM golang:alpine as builder
+FROM golang:latest as builder
 
 ENV CGO_ENABLED=0 GOOS=linux
 WORKDIR /go/src/github.com/shidax-tech/speed-wifi-home-exporter
