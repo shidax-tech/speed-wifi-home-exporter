@@ -11,7 +11,7 @@ type Date time.Time
 func (date *Date) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var s string
 	d.DecodeElement(&s, &start)
-	if parsed, err := time.Parse("2006-01-02", s); err != nil {
+	if parsed, err := time.Parse("2006-1-2", s); err != nil {
 		return err
 	} else {
 		*date = Date(parsed)
@@ -20,7 +20,7 @@ func (date *Date) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 }
 
 func (d *Date) String() string {
-	return (*time.Time)(d).Format("2006-01-02")
+	return (*time.Time)(d).Format("2006-1-2")
 }
 
 type MonthStatistics struct {
